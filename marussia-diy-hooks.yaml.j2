@@ -1,0 +1,42 @@
+---
+{% set hass_url = 'https://<хост>' -%}
+{% set hass_token = '<токен>' -%}
+{% for item in states.light -%}
+- id: {{ item.entity_id }}
+  name: {{ item.name }}
+  description: {{ item.name }}
+  room: {{ area_name(item.entity_id) }}
+  type: devices.types.light
+  capabilities:
+    - type: devices.capabilities.on_off
+      retrievable: true
+      hooks:
+        on:
+          url: {{ hass_url }}/api/services/light/turn_on
+          method: POST
+          headers:
+            Authorization: Bearer {{ hass_token }}
+            Content-Type: application/json
+          json:
+            entity_id: {{ item.entity_id }}
+        off:
+          url: {{ hass_url }}/api/services/light/turn_off
+          method: POST
+          headers:
+            Authorization: Bearer {{ hass_token }}
+            Content-Type: application/json
+          json:
+            entity_id: {{ item.entity_id }}
+        state:
+          url: {{ hass_url }}/api/states/{{ item.entity_id }}
+          method: GET
+          headers:
+            Authorization: Bearer {{ hass_token }}
+            Content-Type: application/json
+  device_info:
+    manufacturer: Mail.RU
+    model: Virtual
+    hw_version: 0.1
+    sw_version: 0.1
+
+{% endfor %}
